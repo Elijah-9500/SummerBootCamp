@@ -10,13 +10,20 @@
   <link rel="stylesheet" href="./styles/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <header>
     <h1 style="color: #ff00ea;font-style: italic;">Elijah Rattray</h1>
     <ul>
-      <li><a href="./index.html">Home</a></li>
-      <li><a href="./pages/about.html">ABOUT ME</a></li>
+      <li>
+        <a href="./index.html">
+          Home
+        </a>
+      </li>
+      <li>
+        <a href="./pages/about.html">
+          ABOUT ME
+        </a>
+      </li>
     </ul>
   </header>
 
@@ -32,6 +39,8 @@
           <button onclick="increase()">Up</button>
         </section>
       </div>
+      <div class="card"></div>
+      <div class="card"></div>
     </div>
   </main>
 
@@ -44,24 +53,22 @@
       <p>Social Media</p>
       <br>
       <a href="https://www.facebook.com/" target="_blank"><img src="./images/icons8-facebook-48.png" alt="facebook"></a>
-      <a href="https://github.com/Anuken/MindustryBuilds?tab=readme-ov-file#readme" target="_blank"><img src="..." alt="github"></a>
+      <a href="https://github.com/Anuken/MindustryBuilds?tab=readme-ov-file#readme" target="_blank"><img src="data:image/jpeg;base64,/9j/..." alt="github"></a>
     </div>
   </footer>
 
-  <!-- Add your JavaScript here -->
+  <!-- JavaScript to handle counter functionality -->
   <script>
-    let counterValue = 0;
+    let count = 0;
 
-    // Function to increase the counter value
     function increase() {
-      counterValue++;
-      document.getElementById('counter').textContent = counterValue;
+      count++;
+      document.getElementById('counter').textContent = count;
     }
 
-    // Function to decrease the counter value
     function decrease() {
-      counterValue--;
-      document.getElementById('counter').textContent = counterValue;
+      count--;
+      document.getElementById('counter').textContent = count;
     }
   </script>
 </body>
