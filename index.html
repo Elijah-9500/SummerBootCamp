@@ -14,22 +14,13 @@
   <header>
     <h1 style="color: #ff00ea;font-style: italic;">Elijah Rattray</h1>
     <ul>
-      <li>
-        <a href="./index.html">
-          Home
-        </a>
-      </li>
-      <li>
-        <a href="./pages/about.html">
-          ABOUT ME
-        </a>
-      </li>
+      <li><a href="./index.html">Home</a></li>
+      <li><a href="./pages/about.html">ABOUT ME</a></li>
     </ul>
   </header>
 
   <main>
     <img src="./images/me.jpg" alt="homepagesmoothie" id="me">
-
     <div class="content">
       <!-- Card 1: Counter -->
       <div class="card">
@@ -47,10 +38,11 @@
         <canvas id="pingPongCanvas" width="400" height="200"></canvas>
       </div>
 
-      <!-- Card 3: Turret Shooting -->
+      <!-- Card 3: Missile Launcher -->
       <div class="card">
-        <h2>Turret Shooting</h2>
+        <h2>Missile Launcher</h2>
         <canvas id="turretCanvas" width="400" height="200"></canvas>
+        <button id="fireMissileBtn">Fire Missile</button>
       </div>
     </div>
   </main>
@@ -61,14 +53,13 @@
       <p><a href="">My GitHub</a></p>
     </div>
     <div class="my_information">
-      <p>Social Media</p>
-      <br>
+      <p>Social Media</p><br>
       <a href="https://www.facebook.com/" target="_blank"><img src="./images/icons8-facebook-48.png" alt="facebook"></a>
       <a href="https://github.com/Anuken/MindustryBuilds?tab=readme-ov-file#readme" target="_blank"><img src="data:image/jpeg;base64,/9j/..." alt="github"></a>
     </div>
   </footer>
 
-  <!-- JavaScript for Counter, Ping Pong and Turret -->
+  <!-- JavaScript for Counter, Ping Pong, and Missiles -->
   <script>
     // Counter Functionality
     document.addEventListener("DOMContentLoaded", function() {
@@ -111,8 +102,6 @@
       // Game state variables
       let rightPressed = false;
       let leftPressed = false;
-      let upPressed = false;
-      let downPressed = false;
 
       // Ball reset after destruction
       function resetBall() {
@@ -206,19 +195,56 @@
       updatePingPong();
     });
 
-    // Turret Shooting (Card 3)
+    // Missile Launcher (Card 3)
     document.addEventListener("DOMContentLoaded", function() {
       const turretCanvas = document.getElementById("turretCanvas");
       const turretCtx = turretCanvas.getContext("2d");
 
-      let laserX = 200;
-      let laserY = 190;
-      let laserWidth = 5;
-      let laserHeight = 15;
-      let laserSpeed = 3;
-      let lasers = [];
+      let missiles = [];
+      let missileSpeed = 3;
+      let maxTurnRate = 0.05; // Maximum turn rate for missile tracking
+      let missileFired = false;
 
-      // Turret
+      // Missiles
+      function Missile(x, y, targetX, targetY) {
+        this.x = x;
+        this.y = y;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.angle = Math.atan2(targetY - y, targetX - x); // Initial angle towards target
+      }
+
+      // Draw missiles
+      function drawMissiles() {
+        missiles.forEach((missile, index) => {
+          let angleToTarget = Math.atan2(missile.targetY - missile.y, missile.targetX - missile.x);
+          let angleDiff = angleToTarget - missile.angle;
+
+          // Apply turn rate limit
+          if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+          if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+          missile.angle += Math.min(Math.max(angleDiff, -maxTurnRate), maxTurnRate);
+
+          missile.x += missileSpeed * Math.cos(missile.angle);
+          missile.y += missileSpeed * Math.sin(missile.angle);
+
+          turretCtx.beginPath();
+          turretCtx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
+          turretCtx.fillStyle = "#FF0000";
+          turretCtx.fill();
+          turretCtx.closePath();
+
+          // Check for collision with the ball
+          if (!pongBallDestroyed && Math.hypot(missile.x - ballX, missile.y - ballY) < ballRadius) {
+            pongBallDestroyed = true;
+            setTimeout(resetBall, 3000); // Respawn ball
+            missiles.splice(index, 1); // Remove missile after hit
+          }
+        });
+      }
+
+      // Draw turret
       function drawTurret() {
         turretCtx.beginPath();
         turretCtx.rect(180, 180, 40, 20); // simple rectangular turret
@@ -227,36 +253,16 @@
         turretCtx.closePath();
       }
 
-      // Draw lasers
-      function drawLasers() {
-        lasers.forEach((laser, index) => {
-          laser.y -= laserSpeed;
-          if (laser.y < 0) lasers.splice(index, 1); // Remove lasers off-screen
-          turretCtx.beginPath();
-          turretCtx.rect(laser.x, laser.y, laserWidth, laserHeight);
-          turretCtx.fillStyle = "#FF00AA";
-          turretCtx.fill();
-          turretCtx.closePath();
+      // Fire missile on button click
+      document.getElementById("fireMissileBtn").addEventListener("click", function() {
+        missiles.push(new Missile(200, 180, ballX, ballY));
+      });
 
-          // Check for collision with the ball in ping pong game
-          if (!pongBallDestroyed && laser.x >= ballX - ballRadius && laser.x <= ballX + ballRadius &&
-              laser.y <= ballY + ballRadius) {
-            pongBallDestroyed = true;
-            setTimeout(resetBall, 3000); // Respawn after 3 seconds
-          }
-        });
-      }
-
-      // Fire laser every 1.5 seconds
-      setInterval(function() {
-        lasers.push({ x: laserX, y: laserY });
-      }, 1500);
-
-      // Update turret canvas
+      // Update missile launcher
       function updateTurret() {
         turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height);
         drawTurret();
-        drawLasers();
+        drawMissiles();
         requestAnimationFrame(updateTurret);
       }
 
