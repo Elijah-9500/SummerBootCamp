@@ -222,9 +222,6 @@
           let angleDiff = angleToTarget - missile.angle;
 
           // Apply turn rate limit to allow some dodging by the ball
-          if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-          if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-
           missile.angle += Math.min(Math.max(angleDiff, -maxTurnRate), maxTurnRate);
 
           // Move the missile
@@ -239,7 +236,7 @@
           turretCtx.closePath();
 
           // Check for collision with the ball
-          if (!pongBallDestroyed && Math.hypot(missile.x - ballX, missile.y - ballY) < ballRadius) {
+          if (!pongBallDestroyed && Math.hypot(missile.x - ballX, missile.y - ballY) < 10) {
             pongBallDestroyed = true;
             setTimeout(resetBall, 3000); // Respawn ball
             missiles.splice(index, 1); // Remove missile after hit
