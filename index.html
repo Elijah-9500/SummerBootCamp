@@ -201,8 +201,8 @@
       const turretCtx = turretCanvas.getContext("2d");
 
       let missiles = [];
-      let missileSpeed = 3;
-      let maxTurnRate = 0.05; // Maximum turn rate for missile tracking
+      let missileSpeed = 4;  // Increase missile speed for better tracking
+      let maxTurnRate = 0.05;  // Maximum turn rate of the missile to allow dodging
       let missileFired = false;
 
       // Missiles
@@ -211,24 +211,27 @@
         this.y = y;
         this.targetX = targetX;
         this.targetY = targetY;
-        this.angle = Math.atan2(targetY - y, targetX - x); // Initial angle towards target
+        this.angle = Math.atan2(targetY - y, targetX - x);  // Initial angle towards the target
       }
 
       // Draw missiles
       function drawMissiles() {
         missiles.forEach((missile, index) => {
+          // Calculate the angle to the target
           let angleToTarget = Math.atan2(missile.targetY - missile.y, missile.targetX - missile.x);
           let angleDiff = angleToTarget - missile.angle;
 
-          // Apply turn rate limit
+          // Apply turn rate limit to allow some dodging by the ball
           if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
           if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
 
           missile.angle += Math.min(Math.max(angleDiff, -maxTurnRate), maxTurnRate);
 
+          // Move the missile
           missile.x += missileSpeed * Math.cos(missile.angle);
           missile.y += missileSpeed * Math.sin(missile.angle);
 
+          // Draw the missile
           turretCtx.beginPath();
           turretCtx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
           turretCtx.fillStyle = "#FF0000";
@@ -255,7 +258,7 @@
 
       // Fire missile on button click
       document.getElementById("fireMissileBtn").addEventListener("click", function() {
-        missiles.push(new Missile(200, 180, ballX, ballY));
+        missiles.push(new Missile(200, 180, ballX, ballY)); // Fire missile towards ball position
       });
 
       // Update missile launcher
