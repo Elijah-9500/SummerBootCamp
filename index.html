@@ -35,8 +35,8 @@
         <section id="counter-section">
           <h2>Counter</h2>
           <p id="counter">0</p>
-          <button onclick="decrease()">Down</button>
-          <button onclick="increase()">Up</button>
+          <button id="downBtn">Down</button>
+          <button id="upBtn">Up</button>
         </section>
       </div>
       <div class="card"></div>
@@ -59,17 +59,29 @@
 
   <!-- JavaScript to handle counter functionality -->
   <script>
-    let count = 0;
+    // Wait for the page to fully load before running the script
+    document.addEventListener("DOMContentLoaded", function() {
+      let count = 0;
 
-    function increase() {
-      count++;
-      document.getElementById('counter').textContent = count;
-    }
+      // Get the counter element
+      const counterElement = document.getElementById('counter');
 
-    function decrease() {
-      count--;
-      document.getElementById('counter').textContent = count;
-    }
+      // Function to increase the counter
+      function increase() {
+        count++;
+        counterElement.textContent = count;
+      }
+
+      // Function to decrease the counter
+      function decrease() {
+        count--;
+        counterElement.textContent = count;
+      }
+
+      // Attach event listeners to the buttons
+      document.getElementById('downBtn').addEventListener('click', decrease);
+      document.getElementById('upBtn').addEventListener('click', increase);
+    });
   </script>
 </body>
 </html>
