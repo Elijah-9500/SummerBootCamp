@@ -25,7 +25,7 @@
       <!-- Card 1: Counter -->
       <div class="card">
         <section id="counter-section">
-          <h2>Counter</h2>
+          <h2 id="counterTitle">Counter</h2>
           <p id="counter">0</p>
           <button id="downBtn">Down</button>
           <button id="upBtn">Up</button>
@@ -65,6 +65,7 @@
     document.addEventListener("DOMContentLoaded", function() {
       let count = 0;
       const counterElement = document.getElementById('counter');
+      const counterTitle = document.getElementById('counterTitle');
 
       function increase() {
         count++;
@@ -78,7 +79,90 @@
 
       document.getElementById('downBtn').addEventListener('click', decrease);
       document.getElementById('upBtn').addEventListener('click', increase);
+
+      // Hammer spawn logic
+      counterTitle.addEventListener("click", function() {
+        if (count === -13) {
+          spawnHammer();
+        }
+      });
     });
+
+    // Hammer Functionality
+    let hammer = null;
+    let hammerOffsetX = 0;
+    let hammerOffsetY = 0;
+
+    function spawnHammer() {
+      // Create hammer and place it in the empty space
+      hammer = {
+        x: 200,
+        y: 100,
+        width: 40,
+        height: 40,
+        dragging: false
+      };
+
+      const turretCanvas = document.getElementById("turretCanvas");
+      const turretCtx = turretCanvas.getContext("2d");
+
+      // Draw hammer
+      function drawHammer() {
+        if (hammer) {
+          turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height); // clear previous frames
+          turretCtx.beginPath();
+          turretCtx.rect(hammer.x, hammer.y, hammer.width, hammer.height);
+          turretCtx.fillStyle = "#0000FF";
+          turretCtx.fill();
+          turretCtx.closePath();
+        }
+      }
+
+      // Add dragging functionality
+      turretCanvas.addEventListener("mousedown", function(e) {
+        if (e.offsetX >= hammer.x && e.offsetX <= hammer.x + hammer.width &&
+            e.offsetY >= hammer.y && e.offsetY <= hammer.y + hammer.height) {
+          hammer.dragging = true;
+          hammerOffsetX = e.offsetX - hammer.x;
+          hammerOffsetY = e.offsetY - hammer.y;
+        }
+      });
+
+      turretCanvas.addEventListener("mousemove", function(e) {
+        if (hammer.dragging) {
+          hammer.x = e.offsetX - hammerOffsetX;
+          hammer.y = e.offsetY - hammerOffsetY;
+          drawHammer();
+        }
+      });
+
+      turretCanvas.addEventListener("mouseup", function() {
+        hammer.dragging = false;
+
+        // Check if hammer is dropped on missile launcher
+        const missileLauncher = { x: 180, y: 180, width: 40, height: 20 }; // Silo position
+        if (hammer.x >= missileLauncher.x && hammer.x <= missileLauncher.x + missileLauncher.width &&
+            hammer.y >= missileLauncher.y && hammer.y <= missileLauncher.y + missileLauncher.height) {
+          explode();
+        }
+      });
+    }
+
+    // Explosion and coin logic
+    function explode() {
+      const turretCanvas = document.getElementById("turretCanvas");
+      const turretCtx = turretCanvas.getContext("2d");
+
+      // Explosion (Hammer + Missile Launcher)
+      turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height); // clear canvas
+
+      // Draw cold coin after explosion
+      turretCtx.beginPath();
+      turretCtx.arc(210, 190, 10, 0, Math.PI * 2); // Coin position
+      turretCtx.fillStyle = "#00FFFF";
+      turretCtx.fill();
+      turretCtx.closePath();
+    }
 
     // Ping Pong Game (Card 2)
     let pongBallDestroyed = false;
@@ -195,54 +279,43 @@
       updatePingPong();
     });
 
-    // Missile Launcher (Card 3)
+    // Missile Shooting (Card 3)
     document.addEventListener("DOMContentLoaded", function() {
       const turretCanvas = document.getElementById("turretCanvas");
       const turretCtx = turretCanvas.getContext("2d");
 
+      let missileSpeed = 4;
       let missiles = [];
-      let missileSpeed = 4;  // Increase missile speed for better tracking
-      let maxTurnRate = 0.05;  // Maximum turn rate of the missile to allow dodging
-      let missileFired = false;
 
-      // Missiles
-      function Missile(x, y, targetX, targetY) {
-        this.x = x;
-        this.y = y;
-        this.targetX = targetX;
-        this.targetY = targetY;
-        this.angle = Math.atan2(targetY - y, targetX - x);  // Initial angle towards the target
+      // Missile class with tracking logic
+      class Missile {
+        constructor(x, y, targetX, targetY) {
+          this.x = x;
+          this.y = y;
+          this.targetX = targetX;
+          this.targetY = targetY;
+          this.angle = Math.atan2(targetY - y, targetX - x);
+        }
+
+        update() {
+          // Lock onto target
+          let angleToTarget = Math.atan2(this.targetY - this.y, this.targetX - this.x);
+          let angleDiff = angleToTarget - this.angle;
+          const maxTurnRate = Math.PI / 64;
+
+          // Update angle to move toward target with a max turn rate
+          this.angle += Math.min(Math.max(angleDiff, -maxTurnRate), maxTurnRate);
+
+          // Move missile
+          this.x += missileSpeed * Math.cos(this.angle);
+          this.y += missileSpeed * Math.sin(this.angle);
+        }
       }
 
-      // Draw missiles
-      function drawMissiles() {
-        missiles.forEach((missile, index) => {
-          // Calculate the angle to the target
-          let angleToTarget = Math.atan2(missile.targetY - missile.y, missile.targetX - missile.x);
-          let angleDiff = angleToTarget - missile.angle;
-
-          // Apply turn rate limit to allow some dodging by the ball
-          missile.angle += Math.min(Math.max(angleDiff, -maxTurnRate), maxTurnRate);
-
-          // Move the missile
-          missile.x += missileSpeed * Math.cos(missile.angle);
-          missile.y += missileSpeed * Math.sin(missile.angle);
-
-          // Draw the missile
-          turretCtx.beginPath();
-          turretCtx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
-          turretCtx.fillStyle = "#FF0000";
-          turretCtx.fill();
-          turretCtx.closePath();
-
-          // Check for collision with the ball
-          if (!pongBallDestroyed && Math.hypot(missile.x - ballX, missile.y - ballY) < 10) {
-            pongBallDestroyed = true;
-            setTimeout(resetBall, 3000); // Respawn ball
-            missiles.splice(index, 1); // Remove missile after hit
-          }
-        });
-      }
+      // Fire missile on button click
+      document.getElementById("fireMissileBtn").addEventListener("click", function() {
+        missiles.push(new Missile(200, 180, ballX, ballY)); // Fire missile towards ball position
+      });
 
       // Draw turret
       function drawTurret() {
@@ -253,12 +326,27 @@
         turretCtx.closePath();
       }
 
-      // Fire missile on button click
-      document.getElementById("fireMissileBtn").addEventListener("click", function() {
-        missiles.push(new Missile(200, 180, ballX, ballY)); // Fire missile towards ball position
-      });
+      // Draw missiles and update them
+      function drawMissiles() {
+        missiles.forEach(missile => {
+          missile.update();
 
-      // Update missile launcher
+          turretCtx.beginPath();
+          turretCtx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
+          turretCtx.fillStyle = "#FF0000";
+          turretCtx.fill();
+          turretCtx.closePath();
+
+          // Check for collision with the ball
+          if (Math.hypot(missile.x - ballX, missile.y - ballY) < 10) {
+            pongBallDestroyed = true;
+            setTimeout(resetBall, 3000); // Respawn ball
+            missiles.splice(missiles.indexOf(missile), 1); // Remove missile after hit
+          }
+        });
+      }
+
+      // Update turret canvas
       function updateTurret() {
         turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height);
         drawTurret();
