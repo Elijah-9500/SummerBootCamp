@@ -47,7 +47,11 @@
         <canvas id="pingPongCanvas" width="400" height="200"></canvas>
       </div>
 
-      <div class="card"></div>
+      <!-- Card 3: Turret Shooting -->
+      <div class="card">
+        <h2>Turret Shooting</h2>
+        <canvas id="turretCanvas" width="400" height="200"></canvas>
+      </div>
     </div>
   </main>
 
@@ -64,7 +68,7 @@
     </div>
   </footer>
 
-  <!-- JavaScript for Counter and Ping Pong -->
+  <!-- JavaScript for Counter, Ping Pong and Turret -->
   <script>
     // Counter Functionality
     document.addEventListener("DOMContentLoaded", function() {
@@ -85,24 +89,76 @@
       document.getElementById('upBtn').addEventListener('click', increase);
     });
 
-    // Ping Pong Game
-    document.addEventListener("DOMContentLoaded", function() {
-      const canvas = document.getElementById("pingPongCanvas");
-      const ctx = canvas.getContext("2d");
+    // Ping Pong Game (Card 2)
+    let pongBallDestroyed = false;
 
-      // Game variables
+    document.addEventListener("DOMContentLoaded", function() {
+      const pingPongCanvas = document.getElementById("pingPongCanvas");
+      const pingPongCtx = pingPongCanvas.getContext("2d");
+
+      // Ball
       let ballRadius = 10;
-      let x = canvas.width / 2;
-      let y = canvas.height / 2;
-      let dx = 2;
-      let dy = -2;
+      let ballX = pingPongCanvas.width / 2;
+      let ballY = pingPongCanvas.height / 2;
+      let ballDx = 2;
+      let ballDy = -2;
+
+      // Paddle
       let paddleHeight = 10;
       let paddleWidth = 75;
-      let paddleX = (canvas.width - paddleWidth) / 2;
+      let paddleX = (pingPongCanvas.width - paddleWidth) / 2;
+
+      // Game state variables
       let rightPressed = false;
       let leftPressed = false;
       let upPressed = false;
       let downPressed = false;
+
+      // Ball reset after destruction
+      function resetBall() {
+        ballX = pingPongCanvas.width / 2;
+        ballY = pingPongCanvas.height / 2;
+        ballDx = 2;
+        ballDy = -2;
+        pongBallDestroyed = false;
+      }
+
+      // Ball movement
+      function drawBall() {
+        pingPongCtx.beginPath();
+        pingPongCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+        pingPongCtx.fillStyle = "#000000";
+        pingPongCtx.fill();
+        pingPongCtx.closePath();
+      }
+
+      // Paddle movement
+      function drawPaddle() {
+        pingPongCtx.beginPath();
+        pingPongCtx.rect(paddleX, pingPongCanvas.height - paddleHeight, paddleWidth, paddleHeight);
+        pingPongCtx.fillStyle = "#000000";
+        pingPongCtx.fill();
+        pingPongCtx.closePath();
+      }
+
+      // Collision detection
+      function collisionDetection() {
+        if (ballX + ballDx > pingPongCanvas.width - ballRadius || ballX + ballDx < ballRadius) {
+          ballDx = -ballDx;
+        }
+        if (ballY + ballDy < ballRadius) {
+          ballDy = -ballDy;
+        }
+        else if (ballY + ballDy > pingPongCanvas.height - ballRadius) {
+          if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+            ballDy = -ballDy;
+          }
+          else {
+            pongBallDestroyed = true;
+            setTimeout(resetBall, 3000); // Respawn after 3 seconds
+          }
+        }
+      }
 
       // Event listeners for paddle movement
       document.addEventListener("keydown", keyDownHandler, false);
@@ -115,12 +171,6 @@
         else if (e.key == "Left" || e.key == "ArrowLeft") {
           leftPressed = true;
         }
-        else if (e.key == "Up" || e.key == "ArrowUp") {
-          upPressed = true;
-        }
-        else if (e.key == "Down" || e.key == "ArrowDown") {
-          downPressed = true;
-        }
       }
 
       function keyUpHandler(e) {
@@ -130,78 +180,87 @@
         else if (e.key == "Left" || e.key == "ArrowLeft") {
           leftPressed = false;
         }
-        else if (e.key == "Up" || e.key == "ArrowUp") {
-          upPressed = false;
-        }
-        else if (e.key == "Down" || e.key == "ArrowDown") {
-          downPressed = false;
-        }
       }
 
-      // Draw ball
-      function drawBall() {
-        ctx.beginPath();
-        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#000000";
-        ctx.fill();
-        ctx.closePath();
-      }
-
-      // Draw paddle
-      function drawPaddle() {
-        ctx.beginPath();
-        ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-        ctx.fillStyle = "#000000";
-        ctx.fill();
-        ctx.closePath();
-      }
-
-      // Collision detection for ball with walls
-      function collisionDetection() {
-        if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-          dx = -dx;
-        }
-        if (y + dy < ballRadius) {
-          dy = -dy;
-        }
-        else if (y + dy > canvas.height - ballRadius) {
-          if (x > paddleX && x < paddleX + paddleWidth) {
-            dy = -dy;
-          }
-          else {
-            alert("GAME OVER");
-            document.location.reload();
-          }
-        }
-      }
-
-      // Update game position
-      function updateGame() {
-        if (rightPressed && paddleX < canvas.width - paddleWidth) {
+      // Update ping pong game
+      function updatePingPong() {
+        if (rightPressed && paddleX < pingPongCanvas.width - paddleWidth) {
           paddleX += 7;
         }
         else if (leftPressed && paddleX > 0) {
           paddleX -= 7;
         }
 
-        if (upPressed && paddleX > 0) {
-          paddleX -= 7;
-        }
-        else if (downPressed && paddleX < canvas.width - paddleWidth) {
-          paddleX += 7;
-        }
+        if (pongBallDestroyed) return; // Don't move the ball if it's destroyed
 
-        x += dx;
-        y += dy;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ballX += ballDx;
+        ballY += ballDy;
+        pingPongCtx.clearRect(0, 0, pingPongCanvas.width, pingPongCanvas.height);
         drawBall();
         drawPaddle();
         collisionDetection();
 
-        requestAnimationFrame(updateGame);
+        requestAnimationFrame(updatePingPong);
       }
 
-      updateGame();
+      updatePingPong();
+    });
+
+    // Turret Shooting (Card 3)
+    document.addEventListener("DOMContentLoaded", function() {
+      const turretCanvas = document.getElementById("turretCanvas");
+      const turretCtx = turretCanvas.getContext("2d");
+
+      let laserX = 200;
+      let laserY = 190;
+      let laserWidth = 5;
+      let laserHeight = 15;
+      let laserSpeed = 3;
+      let lasers = [];
+
+      // Turret
+      function drawTurret() {
+        turretCtx.beginPath();
+        turretCtx.rect(180, 180, 40, 20); // simple rectangular turret
+        turretCtx.fillStyle = "#140000";
+        turretCtx.fill();
+        turretCtx.closePath();
+      }
+
+      // Draw lasers
+      function drawLasers() {
+        lasers.forEach((laser, index) => {
+          laser.y -= laserSpeed;
+          if (laser.y < 0) lasers.splice(index, 1); // Remove lasers off-screen
+          turretCtx.beginPath();
+          turretCtx.rect(laser.x, laser.y, laserWidth, laserHeight);
+          turretCtx.fillStyle = "#FF00AA";
+          turretCtx.fill();
+          turretCtx.closePath();
+
+          // Check for collision with the ball in ping pong game
+          if (!pongBallDestroyed && laser.x >= ballX - ballRadius && laser.x <= ballX + ballRadius &&
+              laser.y <= ballY + ballRadius) {
+            pongBallDestroyed = true;
+            setTimeout(resetBall, 3000); // Respawn after 3 seconds
+          }
+        });
+      }
+
+      // Fire laser every 1.5 seconds
+      setInterval(function() {
+        lasers.push({ x: laserX, y: laserY });
+      }, 1500);
+
+      // Update turret canvas
+      function updateTurret() {
+        turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height);
+        drawTurret();
+        drawLasers();
+        requestAnimationFrame(updateTurret);
+      }
+
+      updateTurret();
     });
   </script>
 </body>
