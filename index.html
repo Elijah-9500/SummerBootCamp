@@ -1,16 +1,36 @@
+<!-- 📝 Save this as index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Landing page for Elijah Rattray Fun Site"/>
-  <title>Summer Bootcamp Template</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
-  <link rel="stylesheet" href="./styles/style.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet"/>
+  <title>Elijah Rattray Fun Site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 20px;
+    }
+    header, footer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    canvas {
+      border: 1px solid #aaa;
+    }
+    img#hammer, img#movableCoin {
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body>
+
   <header>
     <h1 style="color: #ff00ea; font-style: italic;">Elijah Rattray</h1>
     <ul>
@@ -20,48 +40,41 @@
   </header>
 
   <main>
-    <img src="./images/me.jpg" alt="homepagesmoothie" id="me" />
+    <div class="card">
+      <section id="counter-section">
+        <h2>Counter</h2>
+        <p id="counter">0</p>
+        <button id="downBtn">Down</button>
+        <button id="upBtn">Up</button>
+      </section>
+    </div>
 
-    <div class="content">
-      <!-- Card 1: Counter -->
-      <div class="card">
-        <section id="counter-section">
-          <h2>Counter</h2>
-          <p id="counter">0</p>
-          <button id="downBtn">Down</button>
-          <button id="upBtn">Up</button>
-        </section>
-      </div>
+    <div class="card">
+      <h2>Ping Pong Game</h2>
+      <canvas id="pingPongCanvas" width="400" height="200"></canvas>
+    </div>
 
-      <!-- Card 2: Ping Pong -->
-      <div class="card">
-        <h2>Ping Pong Game</h2>
-        <canvas id="pingPongCanvas" width="400" height="200">Canvas not supported</canvas>
-      </div>
-
-      <!-- Card 3: Turret Shooting -->
-      <div class="card" id="siloCard">
-        <h2>Missile Launcher</h2>
-        <button id="fireMissileBtn">Fire Missile</button>
-        <canvas id="turretCanvas" width="400" height="200">Canvas not supported</canvas>
-      </div>
+    <div class="card" id="siloCard">
+      <h2>Missile Launcher</h2>
+      <canvas id="turretCanvas" width="400" height="200"></canvas><br>
+      <button id="fireMissileBtn">Fire Missile</button>
     </div>
   </main>
 
   <footer>
-    <div class="gitHub">
-      <b>GitHub</b>
-      <p><a href="">My GitHub</a></p>
-    </div>
-    <div class="my_information">
-      <p>Social Media</p><br />
-      <a href="https://www.facebook.com/" target="_blank"><img src="./images/icons8-facebook-48.png" alt="facebook" /></a>
-      <a href="https://github.com/Anuken/MindustryBuilds?tab=readme-ov-file#readme" target="_blank"><img src="./images/icons8-github-48.png" alt="github" /></a>
+    <div>
+      <p>Follow me on:</p>
+      <a href="https://www.facebook.com/" target="_blank">
+        <img src="./images/icons8-facebook-48.png" alt="facebook" />
+      </a>
+      <a href="https://github.com/Anuken/MindustryBuilds" target="_blank">
+        <img src="./images/icons8-github-48.png" alt="github" />
+      </a>
     </div>
   </footer>
 
   <script>
-    // Game state variables
+    // === STATE ===
     let counterValue = 0;
     let hammerSpawned = false;
     let siloDestroyed = false;
@@ -69,9 +82,8 @@
     let youWinShown = false;
 
     let missileLaunched = false;
-    let pongBallDestroyed = false;
 
-    // Counter Initialization
+    // === COUNTER ===
     function initCounter() {
       const counterEl = document.getElementById('counter');
       const downBtn = document.getElementById('downBtn');
@@ -82,21 +94,12 @@
         counterEl.textContent = counterValue;
       }
 
-      downBtn.addEventListener('click', () => {
-        counterValue--;
-        updateDisplay();
-      });
+      downBtn.onclick = () => { counterValue--; updateDisplay(); };
+      upBtn.onclick = () => { counterValue++; updateDisplay(); };
 
-      upBtn.addEventListener('click', () => {
-        counterValue++;
-        updateDisplay();
-      });
-
-      counterTitle.addEventListener('click', () => {
-        if (counterValue === -13 && !hammerSpawned) {
-          spawnHammer();
-        }
-      });
+      counterTitle.onclick = () => {
+        if (counterValue === -13 && !hammerSpawned) spawnHammer();
+      };
 
       updateDisplay();
     }
@@ -107,159 +110,70 @@
       hammer.src = './images/hammer.png';
       hammer.alt = 'Hammer';
       hammer.id = 'hammer';
-      hammer.style.width = '40px';
       hammer.style.position = 'absolute';
-      hammer.style.cursor = 'grab';
-      hammer.style.left = '50px';
+      hammer.style.width = '40px';
+      hammer.style.left = '60px';
       hammer.style.top = '300px';
+      hammer.style.cursor = 'grab';
       document.body.appendChild(hammer);
-
       enableDrag(hammer);
     }
 
     function enableDrag(elem) {
       let offsetX, offsetY;
-
       elem.onmousedown = function (e) {
         offsetX = e.clientX - elem.offsetLeft;
         offsetY = e.clientY - elem.offsetTop;
-
         document.onmousemove = function (e) {
           elem.style.left = e.clientX - offsetX + 'px';
           elem.style.top = e.clientY - offsetY + 'px';
-          checkHammerCollisionWithSilo(elem);
+          checkHammerCollision(elem);
         };
-
-        document.onmouseup = function () {
+        document.onmouseup = () => {
           document.onmousemove = null;
           document.onmouseup = null;
         };
       };
     }
 
-    function checkHammerCollisionWithSilo(hammer) {
-      const silo = document.getElementById('siloCard');
-      const rect1 = hammer.getBoundingClientRect();
-      const rect2 = silo.getBoundingClientRect();
-
-      const overlap = !(rect1.right < rect2.left ||
-                        rect1.left > rect2.right ||
-                        rect1.bottom < rect2.top ||
-                        rect1.top > rect2.bottom);
-
-      if (overlap && !siloDestroyed) {
-        destroySilo();
-      }
-    }
-
-    function destroySilo() {
-      siloDestroyed = true;
-      const btn = document.getElementById('fireMissileBtn');
-      btn.disabled = true;
-      btn.textContent = 'Silo Destroyed';
-      revealMovableCoin();
-    }
-
-    function revealMovableCoin() {
-      if (coinRevealed) return;
-      coinRevealed = true;
-
-      const coin = document.createElement('img');
-      coin.src = './images/coin.png';
-      coin.alt = 'Coin';
-      coin.id = 'movableCoin';
-      coin.style.width = '30px';
-      coin.style.position = 'absolute';
-      coin.style.cursor = 'grab';
-      coin.style.left = '500px';
-      coin.style.top = '600px';
-      document.body.appendChild(coin);
-
-      enableDragCoin(coin);
-    }
-
-    function enableDragCoin(elem) {
-      let offsetX, offsetY;
-
-      elem.onmousedown = function (e) {
-        offsetX = e.clientX - elem.offsetLeft;
-        offsetY = e.clientY - elem.offsetTop;
-
-        document.onmousemove = function (e) {
-          elem.style.left = e.clientX - offsetX + 'px';
-          elem.style.top = e.clientY - offsetY + 'px';
-          checkCoinPositionForPongTrigger(elem);
-        };
-
-        document.onmouseup = function () {
-          document.onmousemove = null;
-          document.onmouseup = null;
-        };
-      };
-    }
-
-    function checkCoinPositionForPongTrigger(coin) {
-      const canvas = document.getElementById("pingPongCanvas");
-      const canvasRect = canvas.getBoundingClientRect();
-      const coinRect = coin.getBoundingClientRect();
-
-      const coinCenterY = (coinRect.top + coinRect.bottom) / 2;
-
-      if (coinCenterY < canvasRect.top + canvas.height / 2 && !youWinShown) {
-        youWinShown = true;
-        pausePongAndCollectCoin();
-      }
-    }
-
-    // PONG GAME
+    // === PING PONG GAME ===
+    let pongCanvas, pongCtx;
+    let ballX = 200, ballY = 100, ballDx = 2, ballDy = -2;
     let ballRadius = 10;
-    let ballX, ballY, ballDx, ballDy;
-    let paddleHeight = 10, paddleWidth = 75, paddleX;
+    let paddleX = 162, paddleWidth = 75, paddleHeight = 10;
     let rightPressed = false, leftPressed = false;
 
     function initPingPong() {
-      const canvas = document.getElementById("pingPongCanvas");
-      const ctx = canvas.getContext("2d");
-
-      function resetBall() {
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballDx = 2;
-        ballDy = -2;
-        paddleX = (canvas.width - paddleWidth) / 2;
-        pongBallDestroyed = false;
-      }
-
-      resetBall();
+      pongCanvas = document.getElementById("pingPongCanvas");
+      pongCtx = pongCanvas.getContext("2d");
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
         if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
       });
-
       document.addEventListener("keyup", (e) => {
         if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
         if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
       });
 
       function drawPaddle() {
-        ctx.beginPath();
-        ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-        ctx.fillStyle = "#000";
-        ctx.fill();
-        ctx.closePath();
+        pongCtx.beginPath();
+        pongCtx.rect(paddleX, pongCanvas.height - paddleHeight, paddleWidth, paddleHeight);
+        pongCtx.fillStyle = "#000";
+        pongCtx.fill();
+        pongCtx.closePath();
       }
 
       function drawBall() {
-        ctx.beginPath();
-        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#000";
-        ctx.fill();
-        ctx.closePath();
+        pongCtx.beginPath();
+        pongCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+        pongCtx.fillStyle = "#000";
+        pongCtx.fill();
+        pongCtx.closePath();
       }
 
-      function updateGame() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      function gameLoop() {
+        pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
 
         if (!youWinShown) {
           drawBall();
@@ -267,114 +181,159 @@
 
         drawPaddle();
 
-        if (rightPressed && paddleX < canvas.width - paddleWidth) {
-          paddleX += 5;
-        } else if (leftPressed && paddleX > 0) {
-          paddleX -= 5;
-        }
+        if (rightPressed && paddleX < pongCanvas.width - paddleWidth) paddleX += 5;
+        else if (leftPressed && paddleX > 0) paddleX -= 5;
 
-        if (!pongBallDestroyed && !youWinShown) {
+        if (!youWinShown) {
           ballX += ballDx;
           ballY += ballDy;
 
-          if (ballX + ballDx > canvas.width - ballRadius || ballX + ballDx < ballRadius) {
+          if (ballX + ballDx > pongCanvas.width - ballRadius || ballX + ballDx < ballRadius) {
             ballDx = -ballDx;
           }
 
           if (ballY + ballDy < ballRadius) {
             ballDy = -ballDy;
-          } else if (ballY + ballDy > canvas.height - ballRadius) {
+          } else if (ballY + ballDy > pongCanvas.height - ballRadius) {
             if (ballX > paddleX && ballX < paddleX + paddleWidth) {
               ballDy = -ballDy;
-            } else {
-              pongBallDestroyed = true;
-              setTimeout(resetBall, 3000);
             }
           }
         }
 
-        requestAnimationFrame(updateGame);
+        requestAnimationFrame(gameLoop);
       }
 
-      updateGame();
+      gameLoop();
     }
 
-    function pausePongAndCollectCoin() {
-      setTimeout(() => {
-        ballDx = 0;
-        ballDy = 0;
-
-        const coin = document.getElementById('movableCoin');
-        const rect = coin.getBoundingClientRect();
-        ballX = rect.left + 15;
-        ballY = rect.top + 15;
-
-        const canvas = document.getElementById("pingPongCanvas");
-        const ctx = canvas.getContext("2d");
-
-        let riseInterval = setInterval(() => {
-          const canvasRect = canvas.getBoundingClientRect();
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          drawPaddle();
-          ctx.beginPath();
-          ctx.arc(ballX - canvasRect.left, ballY - canvasRect.top, ballRadius, 0, Math.PI * 2);
-          ctx.fillStyle = "#000";
-          ctx.fill();
-          ctx.closePath();
-
-          ballY -= 2;
-          if (ballY < canvasRect.top) {
-            clearInterval(riseInterval);
-            showWinMessage();
-          }
-        }, 16);
-      }, 1000);
+    function triggerYouWin() {
+      youWinShown = true;
+      pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
+      pongCtx.font = "24px Roboto";
+      pongCtx.fillStyle = "green";
+      pongCtx.fillText("YOU WIN!", 140, 100);
     }
 
-    function showWinMessage() {
-      const canvas = document.getElementById("pingPongCanvas");
-      const ctx = canvas.getContext("2d");
+    // === MISSILE & SILO ===
+    const turretCanvas = document.getElementById("turretCanvas");
+    const turretCtx = turretCanvas.getContext("2d");
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "24px Roboto";
-      ctx.fillStyle = "#00AA00";
-      ctx.fillText("YOU WIN!", canvas.width / 2 - 60, canvas.height / 2);
+    const silo = { x: 180, y: 160, width: 40, height: 40 };
+
+    function drawSilo() {
+      if (!siloDestroyed) {
+        turretCtx.fillStyle = "black";
+        turretCtx.fillRect(silo.x, silo.y, silo.width, silo.height);
+      }
     }
 
-    // Missile Launcher
+    function checkHammerCollision(hammer) {
+      const hammerRect = hammer.getBoundingClientRect();
+      const turretRect = turretCanvas.getBoundingClientRect();
+
+      const hammerCenter = {
+        x: hammerRect.left + hammerRect.width / 2,
+        y: hammerRect.top + hammerRect.height / 2,
+      };
+
+      const siloAbs = {
+        x: turretRect.left + silo.x,
+        y: turretRect.top + silo.y,
+        width: silo.width,
+        height: silo.height,
+      };
+
+      if (
+        hammerCenter.x > siloAbs.x &&
+        hammerCenter.x < siloAbs.x + siloAbs.width &&
+        hammerCenter.y > siloAbs.y &&
+        hammerCenter.y < siloAbs.y + siloAbs.height &&
+        !siloDestroyed
+      ) {
+        destroySilo();
+      }
+    }
+
+    function destroySilo() {
+      siloDestroyed = true;
+      document.getElementById('fireMissileBtn').disabled = true;
+      turretCtx.clearRect(silo.x, silo.y, silo.width, silo.height);
+      revealMovableCoin(silo.x, silo.y);
+    }
+
+    function revealMovableCoin(x, y) {
+      if (coinRevealed) return;
+      coinRevealed = true;
+      const coin = document.createElement("img");
+      coin.src = "./images/coin.png";
+      coin.id = "movableCoin";
+      coin.style.width = "30px";
+      coin.style.position = "absolute";
+      coin.style.cursor = "grab";
+
+      const rect = turretCanvas.getBoundingClientRect();
+      coin.style.left = rect.left + x + "px";
+      coin.style.top = rect.top + y + "px";
+      document.body.appendChild(coin);
+
+      enableDrag(coin);
+
+      setInterval(() => {
+        const coinTop = parseInt(coin.style.top);
+        const gameTop = pongCanvas.getBoundingClientRect().top;
+        if (coinTop < gameTop + 100 && !youWinShown) {
+          triggerYouWin();
+        }
+      }, 200);
+    }
+
     function initMissileLauncher() {
-      const fireBtn = document.getElementById("fireMissileBtn");
-      const canvas = document.getElementById("turretCanvas");
-      const ctx = canvas.getContext("2d");
+      drawSilo();
 
-      fireBtn.addEventListener("click", () => {
+      document.getElementById("fireMissileBtn").onclick = () => {
         if (siloDestroyed || missileLaunched) return;
-
         missileLaunched = true;
-        let missile = { x: 200, y: 190, width: 10, height: 20, dy: -2 };
 
-        function animateMissile() {
-          if (!missileLaunched) return;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.beginPath();
-          ctx.rect(missile.x, missile.y, missile.width, missile.height);
-          ctx.fillStyle = "#FF0000";
-          ctx.fill();
-          ctx.closePath();
+        let missile = { x: 200, y: 190, width: 10, height: 20, speed: 2, angle: 0 };
 
-          missile.y += missile.dy;
+        function updateMissile() {
+          turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height);
+          drawSilo();
 
-          if (missile.y <= 0) {
+          // Track pong
+          const targetX = ballX;
+          const dx = targetX - missile.x;
+          const dy = ballY - missile.y;
+          const desiredAngle = Math.atan2(dy, dx);
+
+          // Max turn speed
+          const delta = ((desiredAngle - missile.angle + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+          const turnSpeed = 0.05;
+          missile.angle += Math.sign(delta) * Math.min(turnSpeed, Math.abs(delta));
+
+          missile.x += Math.cos(missile.angle) * missile.speed;
+          missile.y += Math.sin(missile.angle) * missile.speed;
+
+          turretCtx.save();
+          turretCtx.translate(missile.x, missile.y);
+          turretCtx.rotate(missile.angle);
+          turretCtx.fillStyle = "#F00";
+          turretCtx.fillRect(-5, -10, 10, 20);
+          turretCtx.restore();
+
+          if (missile.y < 0 || missile.y > turretCanvas.height) {
             missileLaunched = false;
           } else {
-            requestAnimationFrame(animateMissile);
+            requestAnimationFrame(updateMissile);
           }
         }
 
-        animateMissile();
-      });
+        updateMissile();
+      };
     }
 
+    // === INIT ===
     document.addEventListener("DOMContentLoaded", () => {
       initCounter();
       initPingPong();
