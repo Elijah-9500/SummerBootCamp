@@ -1,34 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Landing page for Elijah Rattray Fun Site">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Landing page for Elijah Rattray Fun Site"/>
   <title>Summer Bootcamp Template</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-  <link rel="stylesheet" href="./styles/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
+  <link rel="stylesheet" href="./styles/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
   <header>
-    <h1 style="color: #ff00ea;font-style: italic;">Elijah Rattray</h1>
+    <h1 style="color: #ff00ea; font-style: italic;">Elijah Rattray</h1>
     <ul>
-      <li>
-        <a href="./index.html">
-          Home
-        </a>
-      </li>
-      <li>
-        <a href="./pages/about.html">
-          ABOUT ME
-        </a>
-      </li>
+      <li><a href="./index.html">Home</a></li>
+      <li><a href="./pages/about.html">ABOUT ME</a></li>
     </ul>
   </header>
 
   <main>
-    <img src="./images/me.jpg" alt="homepagesmoothie" id="me">
+    <img src="./images/me.jpg" alt="homepagesmoothie" id="me" />
 
     <div class="content">
       <!-- Card 1: Counter -->
@@ -44,14 +36,14 @@
       <!-- Card 2: Ping Pong -->
       <div class="card">
         <h2>Ping Pong Game</h2>
-        <canvas id="pingPongCanvas" width="400" height="200"></canvas>
+        <canvas id="pingPongCanvas" width="400" height="200">Canvas not supported</canvas>
       </div>
 
       <!-- Card 3: Turret Shooting -->
-      <div class="card">
+      <div class="card" id="siloCard">
         <h2>Missile Launcher</h2>
         <button id="fireMissileBtn">Fire Missile</button>
-        <canvas id="turretCanvas" width="400" height="200"></canvas>
+        <canvas id="turretCanvas" width="400" height="200">Canvas not supported</canvas>
       </div>
     </div>
   </main>
@@ -62,231 +54,332 @@
       <p><a href="">My GitHub</a></p>
     </div>
     <div class="my_information">
-      <p>Social Media</p>
-      <br>
-      <a href="https://www.facebook.com/" target="_blank"><img src="./images/icons8-facebook-48.png" alt="facebook"></a>
-      <a href="https://github.com/Anuken/MindustryBuilds?tab=readme-ov-file#readme" target="_blank"><img src="data:image/jpeg;base64,/9j/..." alt="github"></a>
+      <p>Social Media</p><br />
+      <a href="https://www.facebook.com/" target="_blank"><img src="./images/icons8-facebook-48.png" alt="facebook" /></a>
+      <a href="https://github.com/Anuken/MindustryBuilds?tab=readme-ov-file#readme" target="_blank"><img src="./images/icons8-github-48.png" alt="github" /></a>
     </div>
   </footer>
 
-  <!-- JavaScript for Counter, Ping Pong, and Turret -->
   <script>
-    // Counter Functionality
-    document.addEventListener("DOMContentLoaded", function() {
-      let count = 0;
-      const counterElement = document.getElementById('counter');
+    // Game state variables
+    let counterValue = 0;
+    let hammerSpawned = false;
+    let siloDestroyed = false;
+    let coinRevealed = false;
+    let youWinShown = false;
 
-      function increase() {
-        count++;
-        counterElement.textContent = count;
-      }
-
-      function decrease() {
-        count--;
-        counterElement.textContent = count;
-      }
-
-      document.getElementById('downBtn').addEventListener('click', decrease);
-      document.getElementById('upBtn').addEventListener('click', increase);
-    });
-
-    // Ping Pong Game (Card 2)
+    let missileLaunched = false;
     let pongBallDestroyed = false;
-    let coinCollected = false;
 
-    document.addEventListener("DOMContentLoaded", function() {
-      const pingPongCanvas = document.getElementById("pingPongCanvas");
-      const pingPongCtx = pingPongCanvas.getContext("2d");
+    // Counter Initialization
+    function initCounter() {
+      const counterEl = document.getElementById('counter');
+      const downBtn = document.getElementById('downBtn');
+      const upBtn = document.getElementById('upBtn');
+      const counterTitle = document.querySelector('#counter-section h2');
 
-      // Ball
-      let ballRadius = 10;
-      let ballX = pingPongCanvas.width / 2;
-      let ballY = pingPongCanvas.height / 2;
-      let ballDx = 2;
-      let ballDy = -2;
+      function updateDisplay() {
+        counterEl.textContent = counterValue;
+      }
 
-      // Paddle
-      let paddleHeight = 10;
-      let paddleWidth = 75;
-      let paddleX = (pingPongCanvas.width - paddleWidth) / 2;
+      downBtn.addEventListener('click', () => {
+        counterValue--;
+        updateDisplay();
+      });
 
-      // Game state variables
-      let rightPressed = false;
-      let leftPressed = false;
+      upBtn.addEventListener('click', () => {
+        counterValue++;
+        updateDisplay();
+      });
 
-      // Coin properties
-      const coin = { x: 300, y: 100, radius: 5 };
+      counterTitle.addEventListener('click', () => {
+        if (counterValue === -13 && !hammerSpawned) {
+          spawnHammer();
+        }
+      });
 
-      // Ball reset after destruction
+      updateDisplay();
+    }
+
+    function spawnHammer() {
+      hammerSpawned = true;
+      const hammer = document.createElement('img');
+      hammer.src = './images/hammer.png';
+      hammer.alt = 'Hammer';
+      hammer.id = 'hammer';
+      hammer.style.width = '40px';
+      hammer.style.position = 'absolute';
+      hammer.style.cursor = 'grab';
+      hammer.style.left = '50px';
+      hammer.style.top = '300px';
+      document.body.appendChild(hammer);
+
+      enableDrag(hammer);
+    }
+
+    function enableDrag(elem) {
+      let offsetX, offsetY;
+
+      elem.onmousedown = function (e) {
+        offsetX = e.clientX - elem.offsetLeft;
+        offsetY = e.clientY - elem.offsetTop;
+
+        document.onmousemove = function (e) {
+          elem.style.left = e.clientX - offsetX + 'px';
+          elem.style.top = e.clientY - offsetY + 'px';
+          checkHammerCollisionWithSilo(elem);
+        };
+
+        document.onmouseup = function () {
+          document.onmousemove = null;
+          document.onmouseup = null;
+        };
+      };
+    }
+
+    function checkHammerCollisionWithSilo(hammer) {
+      const silo = document.getElementById('siloCard');
+      const rect1 = hammer.getBoundingClientRect();
+      const rect2 = silo.getBoundingClientRect();
+
+      const overlap = !(rect1.right < rect2.left ||
+                        rect1.left > rect2.right ||
+                        rect1.bottom < rect2.top ||
+                        rect1.top > rect2.bottom);
+
+      if (overlap && !siloDestroyed) {
+        destroySilo();
+      }
+    }
+
+    function destroySilo() {
+      siloDestroyed = true;
+      const btn = document.getElementById('fireMissileBtn');
+      btn.disabled = true;
+      btn.textContent = 'Silo Destroyed';
+      revealMovableCoin();
+    }
+
+    function revealMovableCoin() {
+      if (coinRevealed) return;
+      coinRevealed = true;
+
+      const coin = document.createElement('img');
+      coin.src = './images/coin.png';
+      coin.alt = 'Coin';
+      coin.id = 'movableCoin';
+      coin.style.width = '30px';
+      coin.style.position = 'absolute';
+      coin.style.cursor = 'grab';
+      coin.style.left = '500px';
+      coin.style.top = '600px';
+      document.body.appendChild(coin);
+
+      enableDragCoin(coin);
+    }
+
+    function enableDragCoin(elem) {
+      let offsetX, offsetY;
+
+      elem.onmousedown = function (e) {
+        offsetX = e.clientX - elem.offsetLeft;
+        offsetY = e.clientY - elem.offsetTop;
+
+        document.onmousemove = function (e) {
+          elem.style.left = e.clientX - offsetX + 'px';
+          elem.style.top = e.clientY - offsetY + 'px';
+          checkCoinPositionForPongTrigger(elem);
+        };
+
+        document.onmouseup = function () {
+          document.onmousemove = null;
+          document.onmouseup = null;
+        };
+      };
+    }
+
+    function checkCoinPositionForPongTrigger(coin) {
+      const canvas = document.getElementById("pingPongCanvas");
+      const canvasRect = canvas.getBoundingClientRect();
+      const coinRect = coin.getBoundingClientRect();
+
+      const coinCenterY = (coinRect.top + coinRect.bottom) / 2;
+
+      if (coinCenterY < canvasRect.top + canvas.height / 2 && !youWinShown) {
+        youWinShown = true;
+        pausePongAndCollectCoin();
+      }
+    }
+
+    // PONG GAME
+    let ballRadius = 10;
+    let ballX, ballY, ballDx, ballDy;
+    let paddleHeight = 10, paddleWidth = 75, paddleX;
+    let rightPressed = false, leftPressed = false;
+
+    function initPingPong() {
+      const canvas = document.getElementById("pingPongCanvas");
+      const ctx = canvas.getContext("2d");
+
       function resetBall() {
-        ballX = pingPongCanvas.width / 2;
-        ballY = pingPongCanvas.height / 2;
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
         ballDx = 2;
         ballDy = -2;
+        paddleX = (canvas.width - paddleWidth) / 2;
         pongBallDestroyed = false;
       }
 
-      // Ball movement
-      function drawBall() {
-        if (!coinCollected) {
-          pingPongCtx.beginPath();
-          pingPongCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-          pingPongCtx.fillStyle = "#000000";
-          pingPongCtx.fill();
-          pingPongCtx.closePath();
-        }
-      }
+      resetBall();
 
-      // Paddle movement
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
+        if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+      });
+
+      document.addEventListener("keyup", (e) => {
+        if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
+        if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+      });
+
       function drawPaddle() {
-        pingPongCtx.beginPath();
-        pingPongCtx.rect(paddleX, pingPongCanvas.height - paddleHeight, paddleWidth, paddleHeight);
-        pingPongCtx.fillStyle = "#000000";
-        pingPongCtx.fill();
-        pingPongCtx.closePath();
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle = "#000";
+        ctx.fill();
+        ctx.closePath();
       }
 
-      // Coin Drawing
-      function drawCoin() {
-        if (!coinCollected) {
-          pingPongCtx.beginPath();
-          pingPongCtx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
-          pingPongCtx.fillStyle = "#FFD700";
-          pingPongCtx.fill();
-          pingPongCtx.closePath();
-        }
+      function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#000";
+        ctx.fill();
+        ctx.closePath();
       }
 
-      // Collision detection
-      function collisionDetection() {
-        if (ballX + ballDx > pingPongCanvas.width - ballRadius || ballX + ballDx < ballRadius) {
-          ballDx = -ballDx;
-        }
-        if (ballY + ballDy < ballRadius) {
-          ballDy = -ballDy;
-        }
-        else if (ballY + ballDy > pingPongCanvas.height - ballRadius) {
-          if (ballX > paddleX && ballX < paddleX + paddleWidth) {
-            ballDy = -ballDy;
-          }
-          else {
-            pongBallDestroyed = true;
-            setTimeout(resetBall, 3000); // Respawn after 3 seconds
-          }
-        }
-      }
+      function updateGame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Check if the ball picks up the coin
-      function checkCoinPickup() {
-        const distance = Math.sqrt(Math.pow(ballX - coin.x, 2) + Math.pow(ballY - coin.y, 2));
-        if (distance < ballRadius + coin.radius) {
-          coinCollected = true;
-          ballY -= 2; // Ball rises after picking up the coin
+        if (!youWinShown) {
+          drawBall();
         }
-      }
 
-      // Event listeners for paddle movement
-      document.addEventListener("keydown", keyDownHandler, false);
-      document.addEventListener("keyup", keyUpHandler, false);
+        drawPaddle();
 
-      function keyDownHandler(e) {
-        if (e.key == "Right" || e.key == "ArrowRight") {
-          rightPressed = true;
+        if (rightPressed && paddleX < canvas.width - paddleWidth) {
+          paddleX += 5;
+        } else if (leftPressed && paddleX > 0) {
+          paddleX -= 5;
         }
-        else if (e.key == "Left" || e.key == "ArrowLeft") {
-          leftPressed = true;
-        }
-      }
 
-      function keyUpHandler(e) {
-        if (e.key == "Right" || e.key == "ArrowRight") {
-          rightPressed = false;
-        }
-        else if (e.key == "Left" || e.key == "ArrowLeft") {
-          leftPressed = false;
-        }
-      }
-
-      // Update ping pong game
-      function updatePingPong() {
-        if (coinCollected) {
-          if (ballY > 0) {
-            ballY -= 2; // Adjust the speed of the rise
-          }
-        } else {
-          if (rightPressed && paddleX < pingPongCanvas.width - paddleWidth) {
-            paddleX += 7;
-          }
-          else if (leftPressed && paddleX > 0) {
-            paddleX -= 7;
-          }
-
+        if (!pongBallDestroyed && !youWinShown) {
           ballX += ballDx;
           ballY += ballDy;
-        }
 
-        pingPongCtx.clearRect(0, 0, pingPongCanvas.width, pingPongCanvas.height);
-        drawBall();
-        drawPaddle();
-        drawCoin();
-        collisionDetection();
-        checkCoinPickup(); // Check if ball picks up the coin
-
-        if (!coinCollected) {
-          requestAnimationFrame(updatePingPong);
-        }
-      }
-
-      updatePingPong();
-    });
-
-    // Missile Launcher (Card 3)
-    let missileLaunched = false;
-    let missile = { x: 200, y: 190, width: 10, height: 20, dx: 2, dy: -2 };
-
-    const fireMissileBtn = document.getElementById("fireMissileBtn");
-    fireMissileBtn.addEventListener("click", function() {
-      if (!missileLaunched) {
-        missileLaunched = true;
-        launchMissile();
-      }
-    });
-
-    // Missile launch function
-    function launchMissile() {
-      const turretCanvas = document.getElementById("turretCanvas");
-      const turretCtx = turretCanvas.getContext("2d");
-
-      missile.x = 200; // Start position of the missile (turret base)
-      missile.y = 190;
-
-      function updateMissile() {
-        if (missileLaunched) {
-          turretCtx.clearRect(0, 0, turretCanvas.width, turretCanvas.height); // Clear previous missile
-          missile.y += missile.dy; // Move missile up
-          turretCtx.beginPath();
-          turretCtx.rect(missile.x, missile.y, missile.width, missile.height);
-          turretCtx.fillStyle = "#FF0000";
-          turretCtx.fill();
-          turretCtx.closePath();
-
-          // Check for missile collision with pong ball
-          if (missile.x >= ballX - ballRadius && missile.x <= ballX + ballRadius &&
-              missile.y <= ballY + ballRadius) {
-            explode();
-            missileLaunched = false; // Reset missile
+          if (ballX + ballDx > canvas.width - ballRadius || ballX + ballDx < ballRadius) {
+            ballDx = -ballDx;
           }
+
+          if (ballY + ballDy < ballRadius) {
+            ballDy = -ballDy;
+          } else if (ballY + ballDy > canvas.height - ballRadius) {
+            if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+              ballDy = -ballDy;
+            } else {
+              pongBallDestroyed = true;
+              setTimeout(resetBall, 3000);
+            }
+          }
+        }
+
+        requestAnimationFrame(updateGame);
+      }
+
+      updateGame();
+    }
+
+    function pausePongAndCollectCoin() {
+      setTimeout(() => {
+        ballDx = 0;
+        ballDy = 0;
+
+        const coin = document.getElementById('movableCoin');
+        const rect = coin.getBoundingClientRect();
+        ballX = rect.left + 15;
+        ballY = rect.top + 15;
+
+        const canvas = document.getElementById("pingPongCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let riseInterval = setInterval(() => {
+          const canvasRect = canvas.getBoundingClientRect();
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          drawPaddle();
+          ctx.beginPath();
+          ctx.arc(ballX - canvasRect.left, ballY - canvasRect.top, ballRadius, 0, Math.PI * 2);
+          ctx.fillStyle = "#000";
+          ctx.fill();
+          ctx.closePath();
+
+          ballY -= 2;
+          if (ballY < canvasRect.top) {
+            clearInterval(riseInterval);
+            showWinMessage();
+          }
+        }, 16);
+      }, 1000);
+    }
+
+    function showWinMessage() {
+      const canvas = document.getElementById("pingPongCanvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "24px Roboto";
+      ctx.fillStyle = "#00AA00";
+      ctx.fillText("YOU WIN!", canvas.width / 2 - 60, canvas.height / 2);
+    }
+
+    // Missile Launcher
+    function initMissileLauncher() {
+      const fireBtn = document.getElementById("fireMissileBtn");
+      const canvas = document.getElementById("turretCanvas");
+      const ctx = canvas.getContext("2d");
+
+      fireBtn.addEventListener("click", () => {
+        if (siloDestroyed || missileLaunched) return;
+
+        missileLaunched = true;
+        let missile = { x: 200, y: 190, width: 10, height: 20, dy: -2 };
+
+        function animateMissile() {
+          if (!missileLaunched) return;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.beginPath();
+          ctx.rect(missile.x, missile.y, missile.width, missile.height);
+          ctx.fillStyle = "#FF0000";
+          ctx.fill();
+          ctx.closePath();
+
+          missile.y += missile.dy;
 
           if (missile.y <= 0) {
-            missileLaunched = false; // Stop missile when it reaches top of canvas
+            missileLaunched = false;
           } else {
-            requestAnimationFrame(updateMissile); // Continue missile movement
+            requestAnimationFrame(animateMissile);
           }
         }
-      }
 
-      updateMissile();
+        animateMissile();
+      });
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initCounter();
+      initPingPong();
+      initMissileLauncher();
+    });
   </script>
 </body>
 </html>
