@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Elijah Rattray Fun Site</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Roboto', sans-serif;
@@ -12,31 +13,53 @@
     }
 
     header, footer {
-      background: #f0f0f0;
+      background-color: #f0f0f0;
       padding: 10px;
       text-align: center;
     }
 
+    header h1 {
+      color: #ff00ea;
+      font-style: italic;
+      margin: 0;
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: black;
+    }
+
     .content {
       display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      padding: 20px;
-      gap: 20px;
       flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
     }
 
     .card {
-      flex: 1;
-      min-width: 300px;
       border: 1px solid #ccc;
       padding: 20px;
+      min-width: 300px;
+      max-width: 400px;
+      box-sizing: border-box;
     }
 
     canvas {
       background: #eee;
       display: block;
       margin-top: 10px;
+      width: 100%;
+      height: auto;
     }
 
     #missileCanvas {
@@ -44,118 +67,134 @@
       pointer-events: none;
       top: 0;
       left: 0;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1 style="color: #ff00ea; font-style: italic;">Elijah Rattray</h1>
-    <ul style="list-style: none; display: flex; justify-content: center; gap: 20px;">
-      <li><a href="./index.html">Home</a></li>
-      <li><a href="./pages/about.html">ABOUT ME</a></li>
-      <li><a herf="/pages/dino_game.html">DINO GAME</a></li>
-    </ul>
+    <h1>Elijah Rattray</h1>
+    <nav>
+      <ul>
+        <li><a href="./index.html">Home</a></li>
+        <li><a href="./pages/about.html">About Me</a></li>
+        <li><a href="./pages/dino_game.html">Dino Game</a></li>
+      </ul>
+    </nav>
   </header>
 
   <main>
     <div class="content">
-      <!-- Counter Card -->
+      <!-- Counter -->
       <div class="card">
-        <section id="counter-section">
-          <h2 id="counter-title">Counter</h2>
-          <p id="counter">0</p>
-          <button id="downBtn">Down</button>
-          <button id="upBtn">Up</button>
-        </section>
+        <h2 id="counter-title">Counter</h2>
+        <p id="counter-value">0</p>
+        <button id="btn-down">Down</button>
+        <button id="btn-up">Up</button>
       </div>
 
-      <!-- Pong Game Card -->
+      <!-- Pong Game -->
       <div class="card">
-        <h2>Ping Pong Game</h2>
+        <h2>Pong Game</h2>
         <canvas id="pongCanvas" width="400" height="200"></canvas>
       </div>
 
-      <!-- Missile Launcher Card -->
+      <!-- Missile Launcher -->
       <div class="card">
         <h2>Missile Launcher</h2>
         <canvas id="siloCanvas" width="400" height="200"></canvas>
-        <button id="fireMissileBtn">Fire Missile</button>
+        <button id="fireMissile">Fire Missile</button>
       </div>
     </div>
+
     <canvas id="missileCanvas"></canvas>
   </main>
 
   <script>
-    // Global elements
-    const counterDisplay = document.getElementById("counter");
-    const downBtn = document.getElementById("downBtn");
-    const upBtn = document.getElementById("upBtn");
-    const counterTitle = document.getElementById("counter-title");
-
+    // Counter Logic
     let count = 0;
-    let hammerSpawned = false;
+    let hammerUnlocked = false;
     let siloDestroyed = false;
     let coinRevealed = false;
-    let missileLaunched = false;
 
-    // Counter logic
-    downBtn.onclick = () => { count--; updateCounter(); };
-    upBtn.onclick = () => { count++; updateCounter(); };
+    const counterValue = document.getElementById('counter-value');
+    const counterTitle = document.getElementById('counter-title');
+
+    document.getElementById('btn-down').onclick = () => {
+      count--;
+      updateCounter();
+    };
+
+    document.getElementById('btn-up').onclick = () => {
+      count++;
+      updateCounter();
+    };
 
     function updateCounter() {
-      counterDisplay.textContent = count;
+      counterValue.textContent = count;
     }
 
-    // Pong game setup
-    const pongCanvas = document.getElementById("pongCanvas");
-    const pongCtx = pongCanvas.getContext("2d");
+    counterTitle.onclick = () => {
+      if (count === -13 && !hammerUnlocked) {
+        hammerUnlocked = true;
+        setTimeout(() => {
+          siloDestroyed = true;
+          drawSilo();
+          coinRevealed = true;
+        }, 1000);
+      }
+    };
+
+    // Pong Game Logic
+    const pongCanvas = document.getElementById('pongCanvas');
+    const pongCtx = pongCanvas.getContext('2d');
 
     let ball = { x: 200, y: 100, dx: 2, dy: -2, radius: 10 };
     let paddle = { x: 150, width: 100, height: 10 };
     let coin = { x: 300, y: 80, radius: 8 };
-    let rightPressed = false, leftPressed = false;
     let coinCollected = false;
     let showWinMessage = false;
+    let rightPressed = false;
+    let leftPressed = false;
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowRight") rightPressed = true;
-      if (e.key === "ArrowLeft") leftPressed = true;
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') rightPressed = true;
+      if (e.key === 'ArrowLeft') leftPressed = true;
     });
 
-    document.addEventListener("keyup", e => {
-      if (e.key === "ArrowRight") rightPressed = false;
-      if (e.key === "ArrowLeft") leftPressed = false;
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowRight') rightPressed = false;
+      if (e.key === 'ArrowLeft') leftPressed = false;
     });
 
     function drawPongGame() {
       pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
 
-      // Paddle
-      pongCtx.fillStyle = "black";
+      // Draw Paddle
+      pongCtx.fillStyle = 'black';
       pongCtx.fillRect(paddle.x, pongCanvas.height - paddle.height, paddle.width, paddle.height);
 
-      // Ball
+      // Draw Ball
       pongCtx.beginPath();
       pongCtx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      pongCtx.fillStyle = "black";
+      pongCtx.fillStyle = 'black';
       pongCtx.fill();
 
-      // Coin
+      // Draw Coin
       if (coinRevealed && !coinCollected) {
         pongCtx.beginPath();
         pongCtx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
-        pongCtx.fillStyle = "#b87333";
+        pongCtx.fillStyle = '#b87333';
         pongCtx.fill();
       }
 
-      // Win
       if (showWinMessage) {
-        pongCtx.fillStyle = "green";
-        pongCtx.font = "20px Arial";
-        pongCtx.fillText("You Win!", 150, 100);
+        pongCtx.fillStyle = 'green';
+        pongCtx.font = '20px Arial';
+        pongCtx.fillText('You Win!', 150, 100);
       }
 
-      // Move ball
+      // Ball Movement
       if (!coinCollected) {
         ball.x += ball.dx;
         ball.y += ball.dy;
@@ -174,12 +213,12 @@
           const dist = Math.hypot(ball.x - coin.x, ball.y - coin.y);
           if (dist < ball.radius + coin.radius) {
             coinCollected = true;
-            setTimeout(() => showWinMessage = true, 1000);
+            setTimeout(() => showWinMessage = true, 500);
           }
         }
       }
 
-      // Move paddle
+      // Paddle movement
       if (rightPressed && paddle.x + paddle.width < pongCanvas.width) paddle.x += 5;
       if (leftPressed && paddle.x > 0) paddle.x -= 5;
 
@@ -188,52 +227,38 @@
 
     drawPongGame();
 
-    // Missile launcher + silo
-    const siloCanvas = document.getElementById("siloCanvas");
-    const siloCtx = siloCanvas.getContext("2d");
-    const fireMissileBtn = document.getElementById("fireMissileBtn");
+    // Silo and Missile Logic
+    const siloCanvas = document.getElementById('siloCanvas');
+    const siloCtx = siloCanvas.getContext('2d');
 
     const silo = { x: 170, y: 150, width: 60, height: 30 };
 
     function drawSilo() {
       siloCtx.clearRect(0, 0, siloCanvas.width, siloCanvas.height);
       if (!siloDestroyed) {
-        siloCtx.fillStyle = "black";
+        siloCtx.fillStyle = 'black';
         siloCtx.fillRect(silo.x, silo.y, silo.width, silo.height);
       }
     }
 
     drawSilo();
 
-    counterTitle.addEventListener("click", () => {
-      if (count === -13 && !hammerSpawned) {
-        hammerSpawned = true;
-        // Simulate dragging hammer onto silo:
-        setTimeout(() => {
-          siloDestroyed = true;
-          drawSilo();
-          coinRevealed = true;
-        }, 1000);
-      }
-    });
-
-    // Missile canvas
-    const missileCanvas = document.getElementById("missileCanvas");
-    const mCtx = missileCanvas.getContext("2d");
+    const missileCanvas = document.getElementById('missileCanvas');
+    const mCtx = missileCanvas.getContext('2d');
 
     function resizeMissileCanvas() {
       missileCanvas.width = window.innerWidth;
       missileCanvas.height = window.innerHeight;
     }
-    window.addEventListener("resize", resizeMissileCanvas);
+
+    window.addEventListener('resize', resizeMissileCanvas);
     resizeMissileCanvas();
 
-    fireMissileBtn.addEventListener("click", () => {
-      if (!missileLaunched && !siloDestroyed) launchMissile();
-    });
+    document.getElementById('fireMissile').onclick = () => {
+      if (!siloDestroyed) launchMissile();
+    };
 
     function launchMissile() {
-      missileLaunched = true;
       const rect = siloCanvas.getBoundingClientRect();
       let mx = rect.left + silo.x + silo.width / 2;
       let my = rect.top + silo.y;
@@ -262,22 +287,20 @@
         missile.x += missile.speed * Math.cos(missile.angle);
         missile.y += missile.speed * Math.sin(missile.angle);
 
-        // Draw rotated missile
         mCtx.save();
         mCtx.translate(missile.x, missile.y);
         mCtx.rotate(missile.angle + Math.PI / 2);
-        mCtx.fillStyle = "red";
+        mCtx.fillStyle = 'red';
         mCtx.fillRect(-5, -10, 10, 20);
         mCtx.restore();
 
         const distance = Math.hypot(missile.x - targetX, missile.y - targetY);
         if (distance < ball.radius) {
-          missileLaunched = false;
+          showWinMessage = true;
           return;
         }
 
         if (missile.x < 0 || missile.x > window.innerWidth || missile.y < 0 || missile.y > window.innerHeight) {
-          missileLaunched = false;
           return;
         }
 
