@@ -150,8 +150,8 @@
 
     // Keyboard controls
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') rightPressed = true;
-      else if (e.key === 'ArrowLeft') leftPressed = true;
+      if (e.key === 'D') rightPressed = true;
+      else if (e.key === 'A') leftPressed = true;
     });
 
     window.addEventListener('keyup', (e) => {
@@ -164,17 +164,17 @@
       pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
 
       // Background
-      pongCtx.fillStyle = '#FFFFFF';
+      pongCtx.fillStyle = '#000000';
       pongCtx.fillRect(0, 0, pongCanvas.width, pongCanvas.height);
 
       // Paddle
-      pongCtx.fillStyle = '#000000';
+      pongCtx.fillStyle = '#ffffff';
       pongCtx.fillRect(paddle.x, pongCanvas.height - paddle.height, paddle.width, paddle.height);
 
       // Ball
       pongCtx.beginPath();
       pongCtx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      pongCtx.fillStyle = '#000000';
+      pongCtx.fillStyle = '#ffffff';
       pongCtx.fill();
 
       // Coin (only if revealed and not collected)
