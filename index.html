@@ -11,7 +11,7 @@
     margin: 0; padding: 0;
   }
   header, footer {
-    background: #f0f0f0;
+    background: #000000;
     padding: 10px;
     text-align: center;
   }
@@ -181,13 +181,13 @@
       if (coinRevealed && !coinCollected) {
         pongCtx.beginPath();
         pongCtx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
-        pongCtx.fillStyle = '#b87333';
+        pongCtx.fillStyle = '#996633';
         pongCtx.fill();
       }
 
       // Win message
       if (showWinMessage) {
-        pongCtx.fillStyle = 'green';
+        pongCtx.fillStyle = 'ff00ea';
         pongCtx.font = '20px Arial';
         pongCtx.fillText('You Win!', 150, 100);
       }
